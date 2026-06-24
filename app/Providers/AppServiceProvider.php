@@ -10,6 +10,8 @@ use App\Repositories\Contracts\UploadHistoryRepositoryInterface;
 use App\Repositories\Eloquent\UploadHistoryRepository;
 use App\Repositories\Contracts\OfferCategoryRepositoryInterface;
 use App\Repositories\Eloquent\OfferCategoryRepository;
+use App\Repositories\Contracts\PackageRepositoryInterface;
+use App\Repositories\Eloquent\PackageRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
             OfferCategoryRepositoryInterface::class,
             OfferCategoryRepository::class
         );
+        $this->app->bind(
+        PackageRepositoryInterface::class,
+        PackageRepository::class
+    );
     }
 
     /**

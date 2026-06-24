@@ -6,6 +6,7 @@ use App\Repositories\Contracts\MemberRepositoryInterface;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Package;
 
 class MemberService
 {
@@ -29,7 +30,11 @@ class MemberService
     public function createMember(array $data)
     {
         $data['password'] = Hash::make('BNI@' . $data['phone']);
+        $basicPlan = Package::where('name', 'Basic')->first();
 
+        if ($basicPlan) {
+            $data['package_id'] = $basicPlan->id;
+        }
         $member = $this->memberRepo->create($data);
 
         $this->logActivity("Created member: {$member->name} ({$member->email})");

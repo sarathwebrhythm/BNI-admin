@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use App\Models\Package;
 
 
 class Member extends Authenticatable implements JWTSubject
@@ -24,6 +25,7 @@ class Member extends Authenticatable implements JWTSubject
         'chapter',
         'designation',
         'status',
+         'package_id',
     ];
     protected $hidden = [
         'password',
@@ -54,5 +56,8 @@ class Member extends Authenticatable implements JWTSubject
 public function getJWTCustomClaims()
 {
     return [];
+}public function package()
+{
+    return $this->belongsTo(Package::class);
 }
 }

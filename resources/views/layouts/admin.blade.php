@@ -68,6 +68,18 @@
                     </svg>
                     Offer Categories
                 </a>
+                    <a href="{{ route('admin.packages.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group {{ Route::is('admin.packages.*') ? 'bg-[#B40E29] text-white shadow-md shadow-indigo-600/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100' }}">
+                    <svg class="mr-3 h-5 w-5 {{ Route::is('admin.packages.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-100' }}"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 5L5 19M7 7h.01M17 17h.01M9 7a2 2 0 11-4 0 2 2 0 014 0zm10 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  Packages
+                </a>
             </nav>
         </div>
 
