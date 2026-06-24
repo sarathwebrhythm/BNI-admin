@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\ExcelController;
+use App\Http\Controllers\Admin\OfferCategoryController;
 use Illuminate\Support\Facades\Mail;
 
 Route::redirect('/', '/admin/dashboard');
@@ -37,5 +38,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/import', [ExcelController::class, 'import'])->name('import.store');
         Route::get('/export', [ExcelController::class, 'export'])->name('export');
         Route::get('/export-template', [ExcelController::class, 'downloadTemplate'])->name('export-template');
+        // for Offer Categories
+        Route::resource('offer-categories', OfferCategoryController::class);
     });
 });
