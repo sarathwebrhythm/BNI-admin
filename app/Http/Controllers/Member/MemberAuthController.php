@@ -47,6 +47,8 @@ class MemberAuthController extends Controller
                 'chapter' => $member->chapter,
                 'designation' => $member->designation,
                 'profile_photo' => $member->profile_photo,
+                'cover_photo'   => $member->cover_photo,
+                'business_logo' => $member->business_logo,
             ]
         ]);
     }
@@ -66,6 +68,9 @@ class MemberAuthController extends Controller
                 'chapter' => $member->chapter,
                 'designation' => $member->designation,
                 'status' => $member->status,
+                'profile_photo' => $member->profile_photo,  
+                'cover_photo'   => $member->cover_photo,   
+                'business_logo' => $member->business_logo,  
             ]
         ]);
     }

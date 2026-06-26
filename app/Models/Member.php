@@ -20,12 +20,15 @@ class Member extends Authenticatable implements JWTSubject
         'phone',
         'password',
         'company',
-         'profile_photo',
-         'joining_date',
+        'address',
+        'profile_photo',
+        'joining_date',
         'chapter',
         'designation',
         'status',
-         'package_id',
+        'package_id',
+        'cover_photo',
+        'business_logo',
     ];
     protected $hidden = [
         'password',
@@ -49,15 +52,16 @@ class Member extends Authenticatable implements JWTSubject
         });
     }
     public function getJWTIdentifier()
-{
-    return $this->getKey();
-}
+    {
+        return $this->getKey();
+    }
 
-public function getJWTCustomClaims()
-{
-    return [];
-}public function package()
-{
-    return $this->belongsTo(Package::class);
-}
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
 }
