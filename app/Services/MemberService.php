@@ -7,6 +7,8 @@ use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Package;
+use Carbon\Carbon;
+use App\Models\Offer;
 
 class MemberService
 {
@@ -30,6 +32,13 @@ class MemberService
     public function createMember(array $data)
     {
         $data['password'] = Hash::make('BNI@' . $data['phone']);
+        // Automatically set expiry date
+        if (!empty($data['joining_date'])) {
+            $data['expire_date'] = Carbon::parse($data['joining_date'])
+                ->addYear()
+                ->toDateString();
+        }
+
         $basicPlan = Package::where('name', 'Basic')->first();
 
         if ($basicPlan) {
@@ -45,10 +54,18 @@ class MemberService
     public function updateMember($id, array $data)
     {
         $member = $this->memberRepo->update($id, $data);
+
+        // If member status changes, update all their offers
+        if (isset($data['status']) && $data['status'] === 'inactive') {
+            Offer::where('member_id', $member->id)
+                ->where('status', 'active')
+                ->update(['status' => 'inactive']);
+        }
+
         $this->logActivity("Updated member: {$member->name} ({$member->email})");
+
         return $member;
     }
-
     public function deleteMember($id)
     {
         $member = $this->memberRepo->getById($id);

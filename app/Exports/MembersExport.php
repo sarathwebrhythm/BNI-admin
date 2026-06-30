@@ -25,11 +25,14 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'ID',
+            'BNI ID',
             'Name',
             'Email',
             'Phone',
             'Company',
-             'Address',
+            'Address',
+            'Joining Date',
+            'Expiry Date',
             'Chapter',
             'Designation',
             'Status',
@@ -41,15 +44,24 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $member->id,
+            $member->bni_id,
             $member->name,
             $member->email,
             $member->phone,
             $member->company,
-            $member->address, 
+            $member->address,
+            $member->joining_date
+                ? \Carbon\Carbon::parse($member->joining_date)->format('Y-m-d')
+                : '',
+            $member->expire_date
+                ? \Carbon\Carbon::parse($member->expire_date)->format('Y-m-d')
+                : '',
             $member->chapter,
             $member->designation,
             ucfirst($member->status),
-            $member->created_at ? $member->created_at->format('Y-m-d H:i:s') : '',
+            $member->created_at
+                ? $member->created_at->format('Y-m-d H:i:s')
+                : '',
         ];
     }
 }

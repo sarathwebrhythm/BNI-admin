@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\ExcelController;
 use App\Http\Controllers\Admin\OfferCategoryController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\OfferController;
 use Illuminate\Support\Facades\Mail;
 
 Route::redirect('/', '/admin/dashboard');
@@ -43,5 +44,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('offer-categories', OfferCategoryController::class);
          // for packages
         Route::resource('packages', PackageController::class);
+       // for offers
+        Route::resource('offers', OfferController::class);
     });
 });

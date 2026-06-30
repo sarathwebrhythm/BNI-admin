@@ -21,6 +21,8 @@ Route::prefix('member')->group(function () {
         Route::post('/offers', [OfferController::class, 'store']);
         Route::delete('/offers/{id}', [OfferController::class, 'destroy']);
         Route::get('/offer-categories', [OfferController::class, 'categories']);
+        // For all offers (active) for members to view
+         Route::get('/all-offers', [OfferController::class, 'allActive']);
     });
     Route::post('/forgot-password', [MemberForgotPasswordController::class, 'forgotPassword']);
     Route::post('/verify-otp', [MemberForgotPasswordController::class, 'verifyOtp']);

@@ -49,6 +49,8 @@ class MemberAuthController extends Controller
                 'profile_photo' => $member->profile_photo,
                 'cover_photo'   => $member->cover_photo,
                 'business_logo' => $member->business_logo,
+                'joining_date'  => $member->joining_date,
+                'expire_date'   => $member->expire_date,
             ]
         ]);
     }
@@ -71,6 +73,8 @@ class MemberAuthController extends Controller
                 'profile_photo' => $member->profile_photo,  
                 'cover_photo'   => $member->cover_photo,   
                 'business_logo' => $member->business_logo,  
+                'joining_date'  => $member->joining_date,
+                'expire_date'   => $member->expire_date,
             ]
         ]);
     }

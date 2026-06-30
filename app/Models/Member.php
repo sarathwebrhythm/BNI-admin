@@ -23,6 +23,7 @@ class Member extends Authenticatable implements JWTSubject
         'address',
         'profile_photo',
         'joining_date',
+        'expire_date',
         'chapter',
         'designation',
         'status',
@@ -32,6 +33,10 @@ class Member extends Authenticatable implements JWTSubject
     ];
     protected $hidden = [
         'password',
+    ];
+    protected $casts = [
+        'joining_date' => 'date',
+        'expire_date' => 'date',
     ];
     protected static function boot()
     {
