@@ -38,22 +38,24 @@ class MemberAuthController extends Controller
             'message' => 'Login successful',
             'token' => $token,
             'member' => [
-                'id' => $member->id,
-                'bni_id' => $member->bni_id,
-                'name' => $member->name,
-                'email' => $member->email,
-                'phone' => $member->phone,
-                'company' => $member->company,
-                'chapter' => $member->chapter,
-                'designation' => $member->designation,
+                'id'            => $member->id,
+                'bni_id'        => $member->bni_id,
+                'name'          => $member->name,
+                'email'         => $member->email,
+                'phone'         => $member->phone,
+                'company'       => $member->company,
+                'chapter'       => $member->chapter,
+                'designation'   => $member->designation,
                 'profile_photo' => $member->profile_photo,
                 'cover_photo'   => $member->cover_photo,
                 'business_logo' => $member->business_logo,
                 'joining_date'  => $member->joining_date,
                 'expire_date'   => $member->expire_date,
+                'offer_limit'   => $member->package ? $member->package->offer_limit : 1,
             ]
         ]);
     }
+
     public function profile()
     {
         $member = auth('member')->user();
@@ -61,23 +63,25 @@ class MemberAuthController extends Controller
         return response()->json([
             'success' => true,
             'member' => [
-                'id' => $member->id,
-                'bni_id' => $member->bni_id,
-                'name' => $member->name,
-                'email' => $member->email,
-                'phone' => $member->phone,
-                'company' => $member->company,
-                'chapter' => $member->chapter,
-                'designation' => $member->designation,
-                'status' => $member->status,
-                'profile_photo' => $member->profile_photo,  
-                'cover_photo'   => $member->cover_photo,   
-                'business_logo' => $member->business_logo,  
+                'id'            => $member->id,
+                'bni_id'        => $member->bni_id,
+                'name'          => $member->name,
+                'email'         => $member->email,
+                'phone'         => $member->phone,
+                'company'       => $member->company,
+                'chapter'       => $member->chapter,
+                'designation'   => $member->designation,
+                'status'        => $member->status,
+                'profile_photo' => $member->profile_photo,
+                'cover_photo'   => $member->cover_photo,
+                'business_logo' => $member->business_logo,
                 'joining_date'  => $member->joining_date,
                 'expire_date'   => $member->expire_date,
+                'offer_limit'   => $member->package ? $member->package->offer_limit : 1,
             ]
         ]);
     }
+
     public function logout()
     {
         Auth::guard('member')->logout();

@@ -18,7 +18,7 @@ class StoreOfferRequest extends FormRequest
         return [
             'title'             => 'nullable|string|max:255',
             'discount'          => 'required|string|max:100',
-            'offer_category_id' => 'nullable|exists:offer_categories,id',
+            'offer_category_id' => 'required|exists:offer_categories,id',
             'description'       => 'nullable|string|max:1000',
             'start_date'        => 'required|date',
             'end_date'          => 'required|date|after:start_date',
@@ -33,10 +33,12 @@ class StoreOfferRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'discount.required'    => 'Discount is required.',
-            'start_date.required'  => 'Start date is required.',
-            'end_date.required'    => 'End date is required.',
-            'end_date.after'       => 'End date must be after start date.',
+            'discount.required'          => 'Discount is required.',
+            'offer_category_id.required' => 'Please select a category.',
+            'offer_category_id.exists'   => 'Selected category is invalid.',
+            'start_date.required'        => 'Start date is required.',
+            'end_date.required'          => 'End date is required.',
+            'end_date.after'             => 'End date must be after start date.',
         ];
     }
 

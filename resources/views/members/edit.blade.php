@@ -69,7 +69,7 @@
                         type="date"
                         id="joining_date"
                         name="joining_date"
-                        value="{{ old('joining_date') }}"
+                        value="{{ old('joining_date', optional($member->joining_date)->format('Y-m-d')) }}"
                         class="mt-1.5 appearance-none block w-full px-3 py-2 border border-slate-850 rounded-xl bg-slate-950/60 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all">
                 </div>
                 <!-- Chapter -->

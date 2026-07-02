@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOfferRequest;
 use App\Models\Offer;
 use App\Models\OfferCategory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class OfferController extends Controller
@@ -82,7 +83,8 @@ class OfferController extends Controller
 
     public function categories()
     {
-        $categories = OfferCategory::orderBy('name')
+        $categories = OfferCategory::orderBy('order')
+            ->orderBy('name')
             ->get(['id', 'name', 'icon'])
             ->map(function ($cat) {
                 $icon = $cat->icon;
@@ -101,30 +103,41 @@ class OfferController extends Controller
             'categories' => $categories,
         ]);
     }
-    public function allActive()
+
+    public function allActive(Request $request)
     {
-        $offers = Offer::with(['category', 'member'])
+        $query = Offer::with(['category', 'member'])
             ->where('status', 'active')
-            ->whereDate('end_date', '>=', now())
-            ->orderBy('created_at', 'desc')
+            ->whereDate('end_date', '>=', now());
+
+        // Filter by category if provided
+        if ($request->filled('category_id')) {
+            $query->where('offer_category_id', $request->category_id);
+        }
+
+        $offers = $query->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($offer) {
-
                 return [
-                    'id' => $offer->id,
-                    'title' => $offer->title,
-                    'discount' => $offer->discount,
-                    'description' => $offer->description,
-                    'category' => optional($offer->category)->name,
-                    'business_name' => optional($offer->member)->company,
-                    'location' => optional($offer->member)->chapter,
-                    'image' => $offer->image,
+                    'id'             => $offer->id,
+                    'discount'       => $offer->discount,
+                    'description'    => $offer->description,
+                    'category'       => optional($offer->category)->name,
+                    'category_id'    => $offer->offer_category_id,
+                    'business_name'  => optional($offer->member)->company,
+                    'chapter'        => optional($offer->member)->chapter,
+                    'business_address' => optional($offer->member)->address,
+                    'image'          => $offer->image,
+                    'contact_number' => $offer->contact_number,
+                    'start_date'     => $offer->start_date,
+                    'end_date'       => $offer->end_date,
+                    'terms'          => $offer->terms ?? [],
                 ];
             });
 
         return response()->json([
             'success' => true,
-            'offers' => $offers,
+            'offers'  => $offers,
         ]);
     }
 }
