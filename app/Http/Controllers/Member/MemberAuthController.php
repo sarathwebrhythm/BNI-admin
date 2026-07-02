@@ -91,4 +91,25 @@ class MemberAuthController extends Controller
             'message' => 'Logged out successfully'
         ]);
     }
+    public function memberStats()
+    {
+        $member = auth('member')->user();
+
+        $activeOffers  = \App\Models\Offer::where('status', 'active')
+            ->whereDate('end_date', '>=', now())
+            ->count();
+
+        $redeemedCount = \App\Models\OfferStat::where('member_id', $member->id)
+            ->where('type', 'redemption')
+            ->count();
+
+        $totalPartners = \App\Models\Member::where('status', 'active')->count();
+
+        return response()->json([
+            'success'        => true,
+            'active_offers'  => $activeOffers,
+            'redeemed_count' => $redeemedCount,
+            'total_partners' => $totalPartners,
+        ]);
+    }
 }

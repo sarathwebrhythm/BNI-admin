@@ -20,6 +20,9 @@ class Offer extends Model
         'terms',
         'image',
         'contact_number',
+        'views',
+        'redemptions',
+        'saves',
         'status',
         'order',
     ];
@@ -38,5 +41,24 @@ class Offer extends Model
     public function category()
     {
         return $this->belongsTo(OfferCategory::class, 'offer_category_id');
+    }
+    public function stats()
+    {
+        return $this->hasMany(OfferStat::class);
+    }
+
+    public function views()
+    {
+        return $this->hasMany(OfferStat::class)->where('type', 'view');
+    }
+
+    public function redemptions()
+    {
+        return $this->hasMany(OfferStat::class)->where('type', 'redemption');
+    }
+
+    public function saves()
+    {
+        return $this->hasMany(OfferStat::class)->where('type', 'saved');
     }
 }

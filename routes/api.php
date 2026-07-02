@@ -5,6 +5,7 @@ use App\Http\Controllers\Member\MemberAuthController;
 use App\Http\Controllers\Member\MemberForgotPasswordController;
 use App\Http\Controllers\Member\MemberProfileController;
 use App\Http\Controllers\Member\OfferController;
+use App\Http\Controllers\Member\OfferStatController;
 
 Route::prefix('member')->group(function () {
 
@@ -22,7 +23,17 @@ Route::prefix('member')->group(function () {
         Route::delete('/offers/{id}', [OfferController::class, 'destroy']);
         Route::get('/offer-categories', [OfferController::class, 'categories']);
         // For all offers (active) for members to view
-         Route::get('/all-offers', [OfferController::class, 'allActive']);
+        Route::get('/all-offers', [OfferController::class, 'allActive']);
+
+
+        
+        Route::get('/member-stats', [MemberAuthController::class, 'memberStats']);
+       
+        Route::post('/offers/{id}/view', [OfferStatController::class, 'recordView']);
+        Route::post('/offers/{id}/redeem', [OfferStatController::class, 'recordRedemption']);
+        Route::post('/offers/{id}/save', [OfferStatController::class, 'toggleSave']);
+        Route::get('/offers/{id}/stats', [OfferStatController::class, 'getOfferStats']);
+        Route::get('/offers/{id}/saved', [OfferStatController::class, 'checkSaved']);
     });
     Route::post('/forgot-password', [MemberForgotPasswordController::class, 'forgotPassword']);
     Route::post('/verify-otp', [MemberForgotPasswordController::class, 'verifyOtp']);

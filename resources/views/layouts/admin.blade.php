@@ -64,7 +64,7 @@
                         <path stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M19 5L5 19M7 7h.01M17 17h.01M9 7a2 2 0 11-4 0 2 2 0 014 0zm10 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                     Offer Categories
                 </a>
@@ -76,9 +76,21 @@
                         <path stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M19 5L5 19M7 7h.01M17 17h.01M9 7a2 2 0 11-4 0 2 2 0 014 0zm10 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                   Packages
+                </a>
+                <a href="{{ route('admin.offers.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group {{ Route::is('admin.offers.*') ? 'bg-[#B40E29] text-white shadow-md shadow-indigo-600/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100' }}">
+                    <svg class="mr-3 h-5 w-5 {{ Route::is('admin.offers.*') ? 'text-white' : 'text-slate-400 group-hover:text-slate-100' }}"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 5L5 19M7 7h.01M17 17h.01M9 7a2 2 0 11-4 0 2 2 0 014 0zm10 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  Offers
                 </a>
             </nav>
         </div>
