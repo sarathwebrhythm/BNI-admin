@@ -20,10 +20,13 @@ class OfferCategoryController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $filters = [
+            'status' => $request->input('status'),
+        ];
 
-        $categories = $this->offerCategoryService->listCategories(15, $search);
+        $categories = $this->offerCategoryService->listCategories(15, $search, $filters['status']);
 
-        return view('offer-categories.index', compact('categories', 'search'));
+        return view('offer-categories.index', compact('categories', 'search', 'filters'));
     }
 
     public function create()

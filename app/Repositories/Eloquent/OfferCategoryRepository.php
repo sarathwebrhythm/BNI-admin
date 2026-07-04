@@ -14,9 +14,9 @@ class OfferCategoryRepository implements OfferCategoryRepositoryInterface
         $this->model = $model;
     }
 
-    public function getAllPaginated($perPage = 15, $search = null)
+    public function getAllPaginated($perPage = 15, $search = null, $status = null)
     {
-        return $this->buildQuery($search)
+        return $this->buildQuery($search, $status)
             ->paginate($perPage)
             ->withQueryString();
     }
@@ -47,12 +47,16 @@ class OfferCategoryRepository implements OfferCategoryRepositoryInterface
         return $category->delete();
     }
 
-    protected function buildQuery($search = null)
+    protected function buildQuery($search = null, $status = null)
     {
         $query = $this->model->newQuery();
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($status !== null && $status !== '') {
+            $query->where('status', $status === 'active' ? 1 : 0);
         }
 
         return $query->latest();

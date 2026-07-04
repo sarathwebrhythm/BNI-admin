@@ -20,6 +20,7 @@ Route::prefix('member')->group(function () {
         // Offer routes 
         Route::get('/offers', [OfferController::class, 'index']);
         Route::post('/offers', [OfferController::class, 'store']);
+        Route::put('/offers/{id}', [OfferController::class, 'update']);
         Route::delete('/offers/{id}', [OfferController::class, 'destroy']);
         Route::get('/offer-categories', [OfferController::class, 'categories']);
         // For all offers (active) for members to view
@@ -34,6 +35,8 @@ Route::prefix('member')->group(function () {
         Route::post('/offers/{id}/save', [OfferStatController::class, 'toggleSave']);
         Route::get('/offers/{id}/stats', [OfferStatController::class, 'getOfferStats']);
         Route::get('/offers/{id}/saved', [OfferStatController::class, 'checkSaved']);
+
+        Route::get('/recent-leads', [OfferStatController::class, 'recentLeads']);
     });
     Route::post('/forgot-password', [MemberForgotPasswordController::class, 'forgotPassword']);
     Route::post('/verify-otp', [MemberForgotPasswordController::class, 'verifyOtp']);

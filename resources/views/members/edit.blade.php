@@ -43,6 +43,12 @@
                     <input type="text" id="phone" name="phone" value="{{ old('phone', $member->phone) }}"
                         class="mt-1.5 appearance-none block w-full px-3 py-2 border border-slate-850 rounded-xl bg-slate-950/60 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all">
                 </div>
+                                <!-- Address -->
+                <div class="sm:col-span-2">
+                    <label for="address" class="block text-sm font-medium text-slate-300">Address</label>
+                    <input type="text" id="address" name="address" value="{{ old('address', $member->address) }}"
+                        class="mt-1.5 appearance-none block w-full px-3 py-2 border border-slate-850 rounded-xl bg-slate-950/60 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all">
+                </div>
 
                 <!-- Status -->
                 <div>

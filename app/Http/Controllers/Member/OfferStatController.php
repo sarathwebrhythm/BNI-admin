@@ -14,14 +14,20 @@ class OfferStatController extends Controller
     {
         $member = auth('member')->user();
 
+        $offer = Offer::findOrFail($offerId);
+
+
+        if ($offer->member_id == $member->id) {
+            return response()->json(['success' => true]);
+        }
+
         OfferStat::create([
             'offer_id'  => $offerId,
             'member_id' => $member->id,
             'type'      => 'view',
         ]);
 
-        // Increment counter
-        Offer::where('id', $offerId)->increment('views');
+        $offer->increment('views');
 
         return response()->json(['success' => true]);
     }
@@ -31,46 +37,69 @@ class OfferStatController extends Controller
     {
         $member = auth('member')->user();
 
+        $offer = Offer::findOrFail($offerId);
+
+        // Owner redeemed own offer → don't count
+        if ($offer->member_id == $member->id) {
+            return response()->json(['success' => true]);
+        }
+
         OfferStat::create([
             'offer_id'  => $offerId,
             'member_id' => $member->id,
             'type'      => 'redemption',
         ]);
 
-        // Increment counter
-        Offer::where('id', $offerId)->increment('redemptions');
+        $offer->increment('redemptions');
 
         return response()->json(['success' => true]);
     }
 
-    // Toggle save (save/unsave)
-    public function toggleSave(Request $request, $offerId)
-    {
-        $member = auth('member')->user();
+    // Toggle save
+   public function toggleSave(Request $request, $offerId)
+{
+    $member = auth('member')->user();
 
-        $existing = OfferStat::where('offer_id', $offerId)
-            ->where('member_id', $member->id)
-            ->where('type', 'saved')
-            ->first();
+    $offer = Offer::findOrFail($offerId);
 
-        if ($existing) {
-            $existing->delete();
-            // Decrement counter
-            Offer::where('id', $offerId)->decrement('saves');
-            return response()->json(['success' => true, 'saved' => false]);
+    // Check if logged-in member owns this offer
+    $isOwner = $offer->member_id == $member->id;
+
+    $existing = OfferStat::where('offer_id', $offerId)
+        ->where('member_id', $member->id)
+        ->where('type', 'saved')
+        ->first();
+
+    if ($existing) {
+        $existing->delete();
+
+        // Decrease save count only for other members
+        if (!$isOwner) {
+            $offer->decrement('saves');
         }
 
-        OfferStat::create([
-            'offer_id'  => $offerId,
-            'member_id' => $member->id,
-            'type'      => 'saved',
+        return response()->json([
+            'success' => true,
+            'saved'   => false,
         ]);
-
-        // Increment counter
-        Offer::where('id', $offerId)->increment('saves');
-
-        return response()->json(['success' => true, 'saved' => true]);
     }
+
+    OfferStat::create([
+        'offer_id'  => $offerId,
+        'member_id' => $member->id,
+        'type'      => 'saved',
+    ]);
+
+    // Increase save count only for other members
+    if (!$isOwner) {
+        $offer->increment('saves');
+    }
+
+    return response()->json([
+        'success' => true,
+        'saved'   => true,
+    ]);
+}
 
     // Get stats for a specific offer (for business owner)
     public function getOfferStats($offerId)
@@ -105,5 +134,40 @@ class OfferStatController extends Controller
             ->exists();
 
         return response()->json(['success' => true, 'saved' => $saved]);
+    }
+    public function recentLeads()
+    {
+        $member = auth('member')->user();
+
+        $leads = OfferStat::with(['member', 'offer'])
+            ->whereHas('offer', function ($q) use ($member) {
+                $q->where('member_id', $member->id);
+            })
+            ->where('member_id', '!=', $member->id)
+            ->whereIn('type', ['view', 'saved', 'redemption'])
+            ->where('created_at', '>=', now()->subDays(7))
+            ->latest()
+            ->get()
+            ->map(function ($stat) {
+                return [
+                    'id'        => $stat->member->id,
+                    'name'      => $stat->member->name,
+                    'photo'     => $stat->member->profile_photo,
+                    'discount'  => $stat->offer->discount,
+                    'action' => match ($stat->type) {
+                        'view' => 'Viewed',
+                        'saved' => 'Saved',
+                        'redemption' => 'Redeemed',
+                        default => ucfirst($stat->type),
+                    },
+                    'time'      => $stat->created_at->diffForHumans(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'leads'   => $leads,
+        ]);
     }
 }

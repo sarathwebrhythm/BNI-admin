@@ -25,7 +25,10 @@ class StoreOfferRequest extends FormRequest
             'terms'             => 'nullable|array',
             'terms.*'           => 'string',
             'image'             => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'contact_number'    => 'nullable|string|max:20',
+            'contact_number' => [
+                'required',
+                'regex:/^[0-9+\-\s()]{8,15}$/',
+            ],
             'order'             => 'nullable|integer|min:0',
         ];
     }
@@ -39,6 +42,8 @@ class StoreOfferRequest extends FormRequest
             'start_date.required'        => 'Start date is required.',
             'end_date.required'          => 'End date is required.',
             'end_date.after'             => 'End date must be after start date.',
+            'contact_number.required'    => 'Contact number is required.',
+            'contact_number.regex'       => 'Please enter a valid contact number.',
         ];
     }
 

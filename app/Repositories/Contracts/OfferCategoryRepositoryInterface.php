@@ -4,7 +4,7 @@ namespace App\Repositories\Contracts;
 
 interface OfferCategoryRepositoryInterface
 {
-    public function getAllPaginated($perPage = 15, $search = null);
+    public function getAllPaginated($perPage = 15, $search = null, $status = null);
 
     public function getById($id);
 

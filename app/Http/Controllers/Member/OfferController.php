@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOfferRequest;
 use App\Models\Offer;
 use App\Models\OfferCategory;
+use App\Models\OfferStat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,6 +60,51 @@ class OfferController extends Controller
         ]);
     }
 
+    public function update(StoreOfferRequest $request, $id)
+    {
+        $member = auth('member')->user();
+
+        $offer = Offer::where('id', $id)
+            ->where('member_id', $member->id)
+            ->firstOrFail();
+
+        $data = [
+            'offer_category_id' => $request->offer_category_id,
+            'title'             => $request->title,
+            'discount'          => $request->discount,
+            'description'       => $request->description,
+            'start_date'        => $request->start_date,
+            'end_date'          => $request->end_date,
+            'terms'             => $request->terms ?? [],
+            'contact_number'    => $request->contact_number,
+            'order'             => $request->order ?? $offer->order,
+        ];
+
+        if ($request->hasFile('image')) {
+
+
+            if ($offer->image) {
+                $oldPath = ltrim(str_replace('/storage/', '', $offer->image), '/');
+
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            // Upload new image
+            $path = $request->file('image')->store('offer-images', 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
+        $offer->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Offer updated successfully.',
+            'offer'   => $offer->fresh()->load('category'),
+        ]);
+    }
+
     public function destroy($id)
     {
         $member = auth('member')->user();
@@ -106,18 +152,39 @@ class OfferController extends Controller
 
     public function allActive(Request $request)
     {
+         $member = auth('member')->user();
         $query = Offer::with(['category', 'member'])
             ->where('status', 'active')
             ->whereDate('end_date', '>=', now());
+        $savedOfferIds = OfferStat::where('member_id', $member->id)
+            ->where('type', 'saved')
+            ->pluck('offer_id')
+            ->toArray();
 
-        // Filter by category if provided
+        // Filter by category 
         if ($request->filled('category_id')) {
             $query->where('offer_category_id', $request->category_id);
         }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('discount', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('member', function ($q) use ($search) {
+                        $q->where('company', 'like', "%{$search}%")
+                            ->orWhere('chapter', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
 
         $offers = $query->orderBy('created_at', 'desc')
+
+
             ->get()
-            ->map(function ($offer) {
+           ->map(function ($offer) use ($savedOfferIds) {
                 return [
                     'id'             => $offer->id,
                     'discount'       => $offer->discount,
@@ -132,6 +199,7 @@ class OfferController extends Controller
                     'start_date'     => $offer->start_date,
                     'end_date'       => $offer->end_date,
                     'terms'          => $offer->terms ?? [],
+                    'is_saved' => in_array($offer->id, $savedOfferIds)
                 ];
             });
 

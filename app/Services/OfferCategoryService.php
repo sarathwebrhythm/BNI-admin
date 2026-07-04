@@ -17,9 +17,9 @@ class OfferCategoryService
         $this->offerCategoryRepo = $offerCategoryRepo;
     }
 
-    public function listCategories($perPage = 15, $search = null)
+    public function listCategories($perPage = 15, $search = null, $status = null)
     {
-        return $this->offerCategoryRepo->getAllPaginated($perPage, $search);
+        return $this->offerCategoryRepo->getAllPaginated($perPage, $search, $status);
     }
 
     public function getCategoryById($id)
