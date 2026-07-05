@@ -29,8 +29,17 @@
     <div class="bg-slate-900 border border-slate-800/80 rounded-2xl shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-3">
         <!-- Left Banner Profile Summary -->
         <div class="p-8 bg-slate-950 border-r border-slate-850 flex flex-col items-center justify-center text-center">
-            <div class="h-24 w-24 rounded-2xl bg-brand/15 border border-brand/30 flex items-center justify-center font-bold text-slate-200 text-3xl shadow-lg shadow-brand/5 mb-4">
-                {{ substr($member->name, 0, 1) }}
+            <div class="h-24 w-24 rounded-2xl overflow-hidden border border-brand/30 shadow-lg shadow-brand/5 mb-4">
+                @if($member->profile_photo)
+                <img
+                    src="{{ $member->profile_photo }}"
+                    alt="{{ $member->name }}"
+                    class="w-full h-full object-cover">
+                @else
+                <div class="w-full h-full bg-brand/15 flex items-center justify-center font-bold text-slate-200 text-3xl">
+                    {{ strtoupper(substr($member->name, 0, 1)) }}
+                </div>
+                @endif
             </div>
             <h3 class="text-xl font-bold text-slate-100">{{ $member->name }}</h3>
             <p class="text-sm text-slate-400 mt-1">{{ $member->designation ?: 'No Designation Specified' }}</p>
@@ -57,9 +66,17 @@
                     <span class="block text-xs text-slate-500">Email Address</span>
                     <span class="block text-sm font-medium text-slate-200 mt-1 select-all">{{ $member->email }}</span>
                 </div>
+
                 <div>
                     <span class="block text-xs text-slate-500">Phone Number</span>
                     <span class="block text-sm font-medium text-slate-200 mt-1 select-all">{{ $member->phone ?: '—' }}</span>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <span class="block text-xs text-slate-500">Address</span>
+                    <span class="block text-sm font-medium text-slate-200 mt-1">
+                        {{ $member->address ?: '—' }}
+                    </span>
                 </div>
             </div>
 

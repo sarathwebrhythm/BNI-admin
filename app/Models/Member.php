@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use App\Models\Package;
 
 
 class Member extends Authenticatable implements JWTSubject
@@ -19,14 +20,23 @@ class Member extends Authenticatable implements JWTSubject
         'phone',
         'password',
         'company',
-         'profile_photo',
-         'joining_date',
+        'address',
+        'profile_photo',
+        'joining_date',
+        'expire_date',
         'chapter',
         'designation',
         'status',
+        'package_id',
+        'cover_photo',
+        'business_logo',
     ];
     protected $hidden = [
         'password',
+    ];
+    protected $casts = [
+        'joining_date' => 'date',
+        'expire_date' => 'date',
     ];
     protected static function boot()
     {
@@ -47,12 +57,16 @@ class Member extends Authenticatable implements JWTSubject
         });
     }
     public function getJWTIdentifier()
-{
-    return $this->getKey();
-}
+    {
+        return $this->getKey();
+    }
 
-public function getJWTCustomClaims()
-{
-    return [];
-}
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
 }

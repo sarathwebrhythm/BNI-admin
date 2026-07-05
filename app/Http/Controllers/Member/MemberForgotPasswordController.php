@@ -40,7 +40,7 @@ class MemberForgotPasswordController extends Controller
         $member->save();
 
         Mail::raw(
-            "Your BNI password reset OTP is: {$otp}. This OTP will expire in 1 minute.",
+            "Your BNI password reset OTP is: {$otp}. This OTP will expire in 1 minute. Please do not share this OTP with anyone.",
             function ($message) use ($member) {
                 $message->to($member->email)
                         ->subject('BNI Password Reset OTP');
