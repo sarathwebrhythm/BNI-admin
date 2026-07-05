@@ -111,7 +111,8 @@
             <div class="bg-slate-900 border border-slate-800/80 rounded-2xl shadow-lg p-6">
                 <p class="text-xs uppercase tracking-wide text-slate-500 mb-3">Offer Image</p>
                 <img src="{{ asset($offer->image) }}" alt="Offer Image"
-                    class="w-full max-h-64 object-cover rounded-xl border border-slate-700">
+                   className="w-[250px] max-h-34 object-cover rounded-xl border border-slate-700"
+                   style="max-width: 350px;">
             </div>
             @endif
 
