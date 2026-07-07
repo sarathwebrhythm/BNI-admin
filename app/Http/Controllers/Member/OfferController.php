@@ -12,19 +12,46 @@ use Illuminate\Support\Facades\Storage;
 
 class OfferController extends Controller
 {
+    // public function index()
+    // {
+    //     $member = auth('member')->user();
+
+    //     $offers = Offer::where('member_id', $member->id)
+    //         ->with('category')
+    //         ->orderBy('order')
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'offers'  => $offers,
+    //     ]);
+    // }
+
     public function index()
     {
         $member = auth('member')->user();
+
+        // NEW: before fetching the list, fix any offers that expired
+        Offer::where('member_id', $member->id)
+            ->where('end_date', '<', now())
+            ->where('status', 'active')
+            ->update(['status' => 'inactive']);
 
         $offers = Offer::where('member_id', $member->id)
             ->with('category')
             ->orderBy('order')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($offer) {
+                $offer->start_date = optional($offer->start_date)->format('Y-m-d H:i:s');
+                $offer->end_date = optional($offer->end_date)->format('Y-m-d H:i:s');
+                return $offer;
+            });
 
         return response()->json([
             'success' => true,
-            'offers'  => $offers,
+            'offers' => $offers,
         ]);
     }
 
@@ -79,6 +106,12 @@ class OfferController extends Controller
             'contact_number'    => $request->contact_number,
             'order'             => $request->order ?? $offer->order,
         ];
+        if (
+            $offer->status === 'inactive' &&
+            now()->lt($request->end_date)
+        ) {
+            $data['status'] = 'active';
+        }
 
         if ($request->hasFile('image')) {
 
@@ -152,7 +185,7 @@ class OfferController extends Controller
 
     public function allActive(Request $request)
     {
-         $member = auth('member')->user();
+        $member = auth('member')->user();
         $query = Offer::with(['category', 'member'])
             ->where('status', 'active')
             ->whereDate('end_date', '>=', now());
@@ -184,7 +217,7 @@ class OfferController extends Controller
 
 
             ->get()
-           ->map(function ($offer) use ($savedOfferIds) {
+            ->map(function ($offer) use ($savedOfferIds) {
                 return [
                     'id'             => $offer->id,
                     'discount'       => $offer->discount,
