@@ -39,60 +39,113 @@
         </div>
     </div>
 
-    <!-- Search & Filters Card -->
-    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 shadow-md">
-        <form method="GET" action="{{ route('admin.members.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <!-- Search Input -->
-            <div class="md:col-span-2">
-                <label for="search" class="block text-xs font-medium text-slate-400 mb-1.5">Search Members</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <input type="text" id="search" name="search" value="{{ $search }}" placeholder="Search by name, email, phone, company, chapter..."
-                        class="block w-full pl-9 pr-3 py-2 border border-slate-800 rounded-xl bg-slate-950/60 placeholder-slate-500 text-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all">
-                </div>
-            </div>
+    <!-- Search Bar -->
+    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 shadow-md">
+        <form method="GET" action="{{ route('admin.members.index') }}" id="search-form">
+            <!-- Keep filter values when searching -->
+            <input type="hidden" name="status" value="{{ $filters['status'] ?? '' }}">
+            <input type="hidden" name="chapter" value="{{ $filters['chapter'] ?? '' }}">
 
-            <!-- Filter Status -->
-            <div>
-                <label for="status" class="block text-xs font-medium text-slate-400 mb-1.5">Status</label>
-                <select id="status" name="status"
-                    class="block w-full px-3 py-2 border border-slate-800 rounded-xl bg-slate-950/60 text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all cursor-pointer">
-                    <option value="">All Statuses</option>
-                    <option value="active" {{ ($filters['status'] ?? '') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ ($filters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-
-            <!-- Filter Chapter & Buttons -->
-            <div class="flex items-center gap-2">
+            <div class="flex gap-3">
                 <div class="flex-1">
-                    <label for="chapter" class="block text-xs font-medium text-slate-400 mb-1.5">Chapter</label>
-                    <select id="chapter" name="chapter"
-                        class="block w-full px-3 py-2 border border-slate-800 rounded-xl bg-slate-950/60 text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm transition-all cursor-pointer">
-                        <option value="">All Chapters</option>
-                        @foreach($chapters as $ch)
-                            <option value="{{ $ch }}" {{ ($filters['chapter'] ?? '') === $ch ? 'selected' : '' }}>{{ $ch }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" name="search" value="{{ $search }}"
+                        placeholder="Search by name, email, phone, company, chapter..."
+                        class="block w-full px-4 py-2.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand text-sm">
                 </div>
+                <button type="submit"
+                    class="px-5 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition whitespace-nowrap">
+                    Search
+                </button>
+                @if($search)
+                <a href="{{ route('admin.members.index', array_filter(['status' => $filters['status'] ?? '', 'chapter' => $filters['chapter'] ?? ''])) }}"
+                    class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition whitespace-nowrap">
+                    Clear
+                </a>
+                @endif
 
-                <div class="flex gap-2">
-                    <button type="submit" class="px-3.5 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition shrink-0">
-                        Filter
-                    </button>
-                    @if($search || !empty($filters['status']) || !empty($filters['chapter']))
-                        <a href="{{ route('admin.members.index') }}" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition shrink-0" title="Clear Filters">
-                            Clear
-                        </a>
+                <!-- Filter Toggle Button -->
+                <button type="button" onclick="toggleFilters()"
+                    class="flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-semibold transition whitespace-nowrap
+                    {{ !empty($filters['status']) || !empty($filters['chapter']) ? 'border-brand text-brand bg-brand/10' : 'border-slate-700 text-slate-300 hover:border-slate-600 hover:text-slate-200 bg-slate-800/50' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                    </svg>
+                    Filters
+                    @if(!empty($filters['status']) || !empty($filters['chapter']))
+                    <span class="w-2 h-2 rounded-full bg-brand"></span>
                     @endif
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Panel (toggle) -->
+    <div id="filter-panel" class="{{ !empty($filters['status']) || !empty($filters['chapter']) ? '' : 'hidden' }}">
+        <form method="GET" action="{{ route('admin.members.index') }}" id="filter-form">
+            <!-- Keep search value when filtering -->
+            <input type="hidden" name="search" value="{{ $search }}">
+
+            <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 shadow-md">
+                <div class="flex flex-col md:flex-row gap-4 items-end">
+
+                    <!-- Status -->
+                    <div class="w-full md:w-56">
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Status</label>
+                        <select name="status"
+                            class="block w-full px-3 py-2.5 border border-slate-800 rounded-xl bg-slate-950/60 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <option value="">All Status</option>
+                            <option value="active"   {{ ($filters['status'] ?? '') == 'active'   ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ ($filters['status'] ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
+
+                    <!-- Chapter -->
+                    <div class="w-full md:w-56">
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Chapter</label>
+                        <select name="chapter"
+                            class="block w-full px-3 py-2.5 border border-slate-800 rounded-xl bg-slate-950/60 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <option value="">All Chapters</option>
+                            @foreach($chapters as $ch)
+                            <option value="{{ $ch }}" {{ ($filters['chapter'] ?? '') == $ch ? 'selected' : '' }}>{{ $ch }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-2">
+                        <button type="submit"
+                            class="px-5 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl text-sm font-semibold transition">
+                            Apply
+                        </button>
+                        @if(!empty($filters['status']) || !empty($filters['chapter']))
+                        <a href="{{ route('admin.members.index', ['search' => $search]) }}"
+                            class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition">
+                            Clear Filters
+                        </a>
+                        @endif
+                    </div>
+
                 </div>
             </div>
         </form>
     </div>
+
+    <!-- Active Filters Summary -->
+    @if(!empty($filters['status']) || !empty($filters['chapter']))
+    <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs text-slate-500">Active filters:</span>
+        @if(!empty($filters['status']))
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-brand/10 border border-brand/20 text-brand text-xs rounded-full">
+            Status: {{ ucfirst($filters['status']) }}
+        </span>
+        @endif
+        @if(!empty($filters['chapter']))
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-brand/10 border border-brand/20 text-brand text-xs rounded-full">
+            Chapter: {{ $filters['chapter'] }}
+        </span>
+        @endif
+    </div>
+    @endif
 
     <!-- Members Table Card -->
     <div class="bg-slate-900 border border-slate-800/80 rounded-2xl shadow-lg overflow-hidden">
@@ -196,4 +249,12 @@
     </div>
 
 </div>
+
+<script>
+function toggleFilters() {
+    const panel = document.getElementById('filter-panel');
+    panel.classList.toggle('hidden');
+}
+</script>
+
 @endsection

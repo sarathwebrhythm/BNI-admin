@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Member;
-
+use App\Models\Member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,18 +38,24 @@ class MemberAuthController extends Controller
             'message' => 'Login successful',
             'token' => $token,
             'member' => [
-                'id' => $member->id,
-                'bni_id' => $member->bni_id,
-                'name' => $member->name,
-                'email' => $member->email,
-                'phone' => $member->phone,
-                'company' => $member->company,
-                'chapter' => $member->chapter,
-                'designation' => $member->designation,
+                'id'            => $member->id,
+                'bni_id'        => $member->bni_id,
+                'name'          => $member->name,
+                'email'         => $member->email,
+                'phone'         => $member->phone,
+                'company'       => $member->company,
+                'chapter'       => $member->chapter,
+                'designation'   => $member->designation,
                 'profile_photo' => $member->profile_photo,
+                'cover_photo'   => $member->cover_photo,
+                'business_logo' => $member->business_logo,
+                'joining_date'  => $member->joining_date,
+                'expire_date'   => $member->expire_date,
+                'offer_limit'   => $member->package ? $member->package->offer_limit : 1,
             ]
         ]);
     }
+
     public function profile()
     {
         $member = auth('member')->user();
@@ -57,18 +63,81 @@ class MemberAuthController extends Controller
         return response()->json([
             'success' => true,
             'member' => [
-                'id' => $member->id,
-                'bni_id' => $member->bni_id,
-                'name' => $member->name,
-                'email' => $member->email,
-                'phone' => $member->phone,
-                'company' => $member->company,
-                'chapter' => $member->chapter,
-                'designation' => $member->designation,
-                'status' => $member->status,
+                'id'            => $member->id,
+                'bni_id'        => $member->bni_id,
+                'name'          => $member->name,
+                'email'         => $member->email,
+                'phone'         => $member->phone,
+                'company'       => $member->company,
+                'chapter'       => $member->chapter,
+                'designation'   => $member->designation,
+                'status'        => $member->status,
+                'profile_photo' => $member->profile_photo,
+                'cover_photo'   => $member->cover_photo,
+                'business_logo' => $member->business_logo,
+                'joining_date'  => $member->joining_date,
+                'expire_date'   => $member->expire_date,
+                'offer_limit'   => $member->package ? $member->package->offer_limit : 1,
             ]
         ]);
     }
+
+
+    public function ssoLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        // Get email from URL
+        $email = $request->query('email');
+
+        // Find member
+        $member = Member::where('email', $email)->first();
+
+        if (!$member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member not found.'
+            ], 404);
+        }
+
+        // Check member status
+        if ($member->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is not active.'
+            ], 403);
+        }
+
+        // Generate JWT token
+        $token = Auth::guard('member')->login($member);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'SSO Login successful',
+            'token' => $token,
+            'member' => [
+                'id'            => $member->id,
+                'bni_id'        => $member->bni_id,
+                'name'          => $member->name,
+                'email'         => $member->email,
+                'phone'         => $member->phone,
+                'company'       => $member->company,
+                'chapter'       => $member->chapter,
+                'designation'   => $member->designation,
+                'profile_photo' => $member->profile_photo,
+                'cover_photo'   => $member->cover_photo,
+                'business_logo' => $member->business_logo,
+                'joining_date'  => $member->joining_date,
+                'expire_date'   => $member->expire_date,
+                'offer_limit'   => $member->package ? $member->package->offer_limit : 1,
+            ]
+        ]);
+    }
+
+
+
     public function logout()
     {
         Auth::guard('member')->logout();
@@ -76,6 +145,29 @@ class MemberAuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+
+    public function memberStats()
+    {
+        $member = auth('member')->user();
+
+        $activeOffers  = \App\Models\Offer::where('status', 'active')
+            ->whereDate('end_date', '>=', now())
+            ->count();
+
+        $redeemedCount = \App\Models\OfferStat::where('member_id', $member->id)
+            ->where('type', 'redemption')
+            ->count();
+
+        $totalPartners = \App\Models\Member::where('status', 'active')->count();
+
+        return response()->json([
+            'success'        => true,
+            'active_offers'  => $activeOffers,
+            'redeemed_count' => $redeemedCount,
+            'total_partners' => $totalPartners,
         ]);
     }
 }
