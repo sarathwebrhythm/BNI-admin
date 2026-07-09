@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOfferRequest;
 use App\Models\Offer;
 use App\Models\OfferCategory;
 use App\Models\OfferStat;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,6 +29,12 @@ class OfferController extends Controller
     //     ]);
     // }
 
+    protected $notificationService;
+    public function __construct(NotificationService $notificationService)
+
+    {
+        $this->notificationService = $notificationService;
+    }
     public function index()
     {
         $member = auth('member')->user();
@@ -79,6 +86,14 @@ class OfferController extends Controller
             'status'            => 'pending',
             'order'             => $request->order ?? 0,
         ]);
+        $this->notificationService->create(
+            $member->id,
+            'Offer Submitted',
+            "Your offer '{$offer->discount}' is waiting for approval.",
+            'offer_pending',
+            $offer->id,
+            'offer'
+        );
 
         return response()->json([
             'success' => true,

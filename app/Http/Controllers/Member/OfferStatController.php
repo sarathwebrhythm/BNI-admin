@@ -56,50 +56,50 @@ class OfferStatController extends Controller
     }
 
     // Toggle save
-   public function toggleSave(Request $request, $offerId)
-{
-    $member = auth('member')->user();
+    public function toggleSave(Request $request, $offerId)
+    {
+        $member = auth('member')->user();
 
-    $offer = Offer::findOrFail($offerId);
+        $offer = Offer::findOrFail($offerId);
 
-    // Check if logged-in member owns this offer
-    $isOwner = $offer->member_id == $member->id;
+        // Check if logged-in member owns this offer
+        $isOwner = $offer->member_id == $member->id;
 
-    $existing = OfferStat::where('offer_id', $offerId)
-        ->where('member_id', $member->id)
-        ->where('type', 'saved')
-        ->first();
+        $existing = OfferStat::where('offer_id', $offerId)
+            ->where('member_id', $member->id)
+            ->where('type', 'saved')
+            ->first();
 
-    if ($existing) {
-        $existing->delete();
+        if ($existing) {
+            $existing->delete();
 
-        // Decrease save count only for other members
+            // Decrease save count only for other members
+            if (!$isOwner) {
+                $offer->decrement('saves');
+            }
+
+            return response()->json([
+                'success' => true,
+                'saved'   => false,
+            ]);
+        }
+
+        OfferStat::create([
+            'offer_id'  => $offerId,
+            'member_id' => $member->id,
+            'type'      => 'saved',
+        ]);
+
+        // Increase save count only for other members
         if (!$isOwner) {
-            $offer->decrement('saves');
+            $offer->increment('saves');
         }
 
         return response()->json([
             'success' => true,
-            'saved'   => false,
+            'saved'   => true,
         ]);
     }
-
-    OfferStat::create([
-        'offer_id'  => $offerId,
-        'member_id' => $member->id,
-        'type'      => 'saved',
-    ]);
-
-    // Increase save count only for other members
-    if (!$isOwner) {
-        $offer->increment('saves');
-    }
-
-    return response()->json([
-        'success' => true,
-        'saved'   => true,
-    ]);
-}
 
     // Get stats for a specific offer (for business owner)
     public function getOfferStats($offerId)
@@ -168,6 +168,42 @@ class OfferStatController extends Controller
         return response()->json([
             'success' => true,
             'leads'   => $leads,
+        ]);
+    }
+    // Get all offers the current member has saved
+    public function savedOffers()
+    {
+        $member = auth('member')->user();
+
+        $offers = OfferStat::with(['offer.category', 'offer.member'])
+            ->where('member_id', $member->id)
+            ->where('type', 'saved')
+            ->latest()
+            ->get()
+            ->pluck('offer')
+            ->filter() // drop nulls in case a saved offer was later deleted
+            ->map(function ($offer) {
+                return [
+                    'id'                => $offer->id,
+                    'discount'          => $offer->discount,
+                    'description'       => $offer->description,
+                    'category'          => optional($offer->category)->name,
+                    'category_id'       => $offer->offer_category_id,
+                    'business_name'     => optional($offer->member)->company,
+                    'chapter'           => optional($offer->member)->chapter,
+                    'business_address'  => optional($offer->member)->address,
+                    'image'             => $offer->image,
+                    'contact_number'    => $offer->contact_number,
+                    'start_date'        => $offer->start_date,
+                    'end_date'          => $offer->end_date,
+                    'terms'             => $offer->terms ?? [],
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'offers'  => $offers,
         ]);
     }
 }

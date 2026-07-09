@@ -6,6 +6,7 @@ use App\Http\Controllers\Member\MemberForgotPasswordController;
 use App\Http\Controllers\Member\MemberProfileController;
 use App\Http\Controllers\Member\OfferController;
 use App\Http\Controllers\Member\OfferStatController;
+use App\Http\Controllers\Member\NotificationController;
 
 Route::prefix('member')->group(function () {
 
@@ -25,7 +26,12 @@ Route::prefix('member')->group(function () {
         Route::get('/offer-categories', [OfferController::class, 'categories']);
         // For all offers (active) for members to view
         Route::get('/all-offers', [OfferController::class, 'allActive']);
-
+         // for notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+         // saved offers 
+         Route::get('/saved-offers', [OfferStatController::class, 'savedOffers']);
 
         
         Route::get('/member-stats', [MemberAuthController::class, 'memberStats']);

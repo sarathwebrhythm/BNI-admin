@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Services\ExcelService;
 use App\Http\Requests\ImportExcelRequest;
@@ -49,14 +50,16 @@ class ExcelController extends Controller
     public function export(Request $request)
     {
         $search = $request->input('search');
+
         $filters = [
             'status' => $request->input('status'),
             'chapter' => $request->input('chapter'),
         ];
 
         $export = $this->excelService->exportMembers($search, $filters);
-        
+
         $filename = 'bni_members_' . date('Y_m_d_His') . '.xlsx';
+
         return Excel::download($export, $filename);
     }
 
@@ -67,11 +70,51 @@ class ExcelController extends Controller
             'Content-Disposition' => 'attachment; filename="bni_member_import_template.csv"',
         ];
 
-        $callback = function() {
+        $callback = function () {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['name', 'email', 'phone', 'company', 'chapter', 'designation', 'status']);
-            fputcsv($file, ['John Doe', 'john.doe@example.com', '+1234567890', 'Alpha Co', 'Pinnacle', 'President', 'active']);
-            fputcsv($file, ['Jane Smith', 'jane.smith@example.com', '+0987654321', 'Beta Corp', 'Synergy', 'Vice President', 'active']);
+
+            // Header Row
+            fputcsv($file, [
+                'name',
+                'email',
+                'phone',
+                'address',
+                'company',
+                'chapter',
+                'designation',
+                'joining_date',
+                'expire_date',
+                'status'
+            ]);
+
+            // Sample Member 1
+            fputcsv($file, [
+                'John Doe',
+                'john.doe@example.com',
+                '+919876543210',
+                '123 Main Street, Trivandrum',
+                'Alpha Co',
+                'Pinnacle',
+                'President',
+                '2026-07-01',
+                '2027-07-01',
+                'active'
+            ]);
+
+            // Sample Member 2
+            fputcsv($file, [
+                'Jane Smith',
+                'jane.smith@example.com',
+                '+919876543211',
+                '456 MG Road, Kochi',
+                'Beta Corp',
+                'Synergy',
+                'Vice President',
+                '2026-07-15',
+                '2027-07-15',
+                'active'
+            ]);
+
             fclose($file);
         };
 
