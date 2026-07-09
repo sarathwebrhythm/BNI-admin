@@ -25,6 +25,8 @@ class ExcelController extends Controller
 
     public function import(ImportExcelRequest $request)
     {
+        set_time_limit(600);
+        ini_set('memory_limit', '1024M');
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
         $adminId = Auth::guard('admin')->id();

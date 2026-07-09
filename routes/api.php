@@ -12,6 +12,9 @@ Route::prefix('member')->group(function () {
 
     Route::post('/login', [MemberAuthController::class, 'login']);
 
+    // for sso login
+    Route::get('/sso-login', [MemberAuthController::class, 'ssoLogin']);
+
     Route::middleware('auth:member')->group(function () {
         Route::get('/profile', [MemberAuthController::class, 'profile']);
         Route::post('/logout', [MemberAuthController::class, 'logout']);
