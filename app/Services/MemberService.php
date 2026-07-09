@@ -33,11 +33,11 @@ class MemberService
     {
         $data['password'] = Hash::make('BNI@' . $data['phone']);
         // Automatically set expiry date
-        if (!empty($data['joining_date'])) {
-            $data['expire_date'] = Carbon::parse($data['joining_date'])
-                ->addYear()
-                ->toDateString();
-        }
+        // if (!empty($data['joining_date'])) {
+        //     $data['expire_date'] = Carbon::parse($data['joining_date'])
+        //         ->addYear()
+        //         ->toDateString();
+        // }
 
         $basicPlan = Package::where('name', 'Basic')->first();
 

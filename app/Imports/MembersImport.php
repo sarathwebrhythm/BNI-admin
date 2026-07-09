@@ -10,17 +10,19 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Package;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
+
 
 class MembersImport implements ToCollection, WithHeadingRow
 {
 
-    
+
     public $totalCount = 0;
     public $importedCount = 0;
     public $skippedCount = 0;
 
     protected $processedEmails = [];
-        protected $basicPackageId;
+    protected $basicPackageId;
 
     public function __construct()
     {
@@ -45,17 +47,31 @@ class MembersImport implements ToCollection, WithHeadingRow
                 'designation' => isset($row['designation']) ? trim($row['designation']) : null,
                 'status' => isset($row['status']) ? strtolower(trim($row['status'])) : 'active',
             ];
-
+            // Convert Excel dates
+            foreach (['joining_date', 'expire_date'] as $field) {
+                if (!empty($data[$field])) {
+                    if (is_numeric($data[$field])) {
+                        $data[$field] = Carbon::instance(
+                            ExcelDate::excelToDateTimeObject($data[$field])
+                        )->format('Y-m-d');
+                    } else {
+                        $data[$field] = Carbon::parse($data[$field])->format('Y-m-d');
+                    }
+                }
+            }
             // Normalize status to 'active' or 'inactive'
             if (!in_array($data['status'], ['active', 'inactive'])) {
                 $data['status'] = 'active';
             }
 
-            // Validate required fields
+            //Validate required fields
             $validator = Validator::make($data, [
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
+                'joining_date' => 'nullable|date',
+                'expire_date' => 'nullable|date|after:joining_date',
             ]);
+      
 
             if ($validator->fails()) {
                 $this->skippedCount++;
@@ -75,17 +91,17 @@ class MembersImport implements ToCollection, WithHeadingRow
                 'name' => $data['name'],
                 'email' => $email,
                 'phone' => $data['phone'],
-                 'password' => Hash::make('BNI@' . $data['phone']),
+                'password' => Hash::make('BNI@' . $data['phone']),
                 'company' => $data['company'],
                 'address' => $data['address'],
                 'joining_date' => $data['joining_date'],
-                 'expire_date' => Carbon::parse($data['joining_date'])->addYear()->format('Y-m-d'),
+                'expire_date' => $data['expire_date'],
                 'chapter' => $data['chapter'],
                 'designation' => $data['designation'],
                 'status' => $data['status'],
                 'package_id' => $this->basicPackageId,
             ]);
-            
+
 
             $this->processedEmails[] = $email;
             $this->importedCount++;

@@ -44,6 +44,10 @@ class StoreOfferRequest extends FormRequest
             'end_date.after'             => 'End date must be after start date.',
             'contact_number.required'    => 'Contact number is required.',
             'contact_number.regex'       => 'Please enter a valid contact number.',
+            // Image validation messages
+            'image.image' => 'Please upload a valid image.',
+            'image.mimes' => 'Please upload a valid image in JPG, JPEG, PNG, or WEBP format.',
+            'image.max'   => 'Image size must not exceed 2 MB.',
         ];
     }
 
