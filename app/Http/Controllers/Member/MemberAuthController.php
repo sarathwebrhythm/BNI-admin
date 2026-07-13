@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Member;
+
 use App\Models\Member;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -89,10 +90,8 @@ class MemberAuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        // Get email from URL
-        $email = $request->query('email');
+        $email = $request->email;
 
-        // Find member
         $member = Member::where('email', $email)->first();
 
         if (!$member) {
@@ -102,7 +101,6 @@ class MemberAuthController extends Controller
             ], 404);
         }
 
-        // Check member status
         if ($member->status !== 'active') {
             return response()->json([
                 'success' => false,
@@ -110,7 +108,6 @@ class MemberAuthController extends Controller
             ], 403);
         }
 
-        // Generate JWT token
         $token = Auth::guard('member')->login($member);
 
         return response()->json([
@@ -135,7 +132,6 @@ class MemberAuthController extends Controller
             ]
         ]);
     }
-
 
 
     public function logout()
